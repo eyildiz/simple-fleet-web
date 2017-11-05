@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/4.6.1/firebase.js"></script>
+    <title>Simple Vehicle Monitor</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="starter-template.css" rel="stylesheet">
+
+    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+    <script src="ie-emulation-modes-warning.js"></script>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Variant-E2 Vehicle Tracker</a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Dashboard</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container-fluid">
+
+      <div class="starter-template">
+        <h1>Vehicle Tracking</h1>
+        <p class="lead"></p>
+
+      </div>
+
+      <div class="row">
+      <div class="col-lg-3" id="vehicleData" style="font-size:28px;">
+		<div class="panel panel-default">
+		  <div class="panel-heading">Anlık Araç Verileri</div>
+		  <div class="panel-body">
+		    
+		    <div class="row">
+		    	<div class="col-lg-12">
+		    				  <table width="100%">
+		  	<tr>
+		  		<td>
+		  			<span style="font-size:16px;">Araç Hızı : </span>		  			
+		  		</td>
+		  		<td>
+		  			<span id="txtVehicleSpeed" class="pull-right label label-primary">20 km/sa</span>
+		  		</td>
+		  	</tr>
+		  	<tr>
+		  		<td>
+		  			<span style="font-size:16px;">Araç Maksimum Hızı : </span>
+		  		</td>
+		  		<td>
+		  			<span id="txtMaxSpeed" class="pull-right label label-default">50 km/sa</span>
+		  		</td>
+		  	</tr>
+		  </table>
+
+
+		  <div class="row" style="margin-top:15px; padding:0px;">
+			  <div class="col-lg-10" style="padding:0px 5px;">
+				<input type="text" placeholder="Genel Mesaj" class="form-control" id="notificationText">		  	
+			  </div>
+			  <div class="col-lg-2" style="padding:0px;">
+				<button id="clickButton" type="button" style="margin-top:-8px;" class="btn btn-sm btn-warning">Gönder</button>	
+				</div>	 
+		  </div>
+
+		  <div class="row" style="margin-top:15px; padding:0px;">
+			  <div class="col-lg-10" style="padding:0px 5px;">
+				<input type="text" placeholder="Hız Sınırı" class="form-control" id="maxVehicleSpeed">		  	
+			  </div>
+			  <div class="col-lg-2" style="padding:0px;">
+				<button id="btnMaxSpeed" type="button" style="margin-top:-8px;" class="btn btn-sm btn-warning">Sınırla</button>	
+				</div>	 
+		  </div>
+
+
+		    	</div>
+
+		    </div>
+
+
+
+
+
+		  </div>
+		</div>
+      </div>
+      <div class="col-lg-9">
+			<div id="googleMap" style="width:100%;height:600px;"></div>
+      </div>
+      </div>
+
+    </div><!-- /.container -->
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="ie10-viewport-bug-workaround.js"></script>
+
+	<script>
+
+	var marker;
+	var map;
+	var lat,lng;
+	var maxSpeed = 50;
+
+	function myMap() {
+	var mapProp= {
+	    center:new google.maps.LatLng(40.975211,29.232627),
+	    zoom:16,
+	};
+	map=new google.maps.Map(document.getElementById("googleMap"),mapProp);
+
+	var latlng = new google.maps.LatLng(40.975211,29.232627);
+
+	marker=new google.maps.Marker({
+	  position:latlng,
+	  icon:'pin.png'
+	  });
+
+	marker.setMap(map);
+
+	}
+	</script>
+
+	<script>
+
+		  // Initialize Firebase
+		  var config = {
+		    apiKey: "AIzaSyAk7T9GhADtDFb8rqAUvrMVcV5TNgI4J1M",
+		    authDomain: "openxc-c03d5.firebaseapp.com",
+		    databaseURL: "https://openxc-c03d5.firebaseio.com",
+		    projectId: "openxc-c03d5",
+		    storageBucket: "openxc-c03d5.appspot.com",
+		    messagingSenderId: "837017406938"
+		  };
+		  firebase.initializeApp(config);
+
+
+		  // create variable to reference the database
+		  var database = firebase.database();
+		  var name = "";
+
+		  $("#clickButton").on("click", function(e){
+		  		//name = $("#nameinput").val().trim();
+
+		  		database.ref("notification").set({
+		  			message: $("#notificationText").val()
+		  		});
+
+		  		return false;
+		  });
+
+		  $("#btnMaxSpeed").on('click',function(){
+		  		database.ref("maxSpeed").set({
+		  			max: parseInt($("#maxVehicleSpeed").val())
+		  		});
+
+		  		$("#txtMaxSpeed").html($("#maxVehicleSpeed").val() + " km/sa");
+		  		maxSpeed = parseInt($("#maxVehicleSpeed").val());
+		  		$("#maxVehicleSpeed").val("");
+		  		
+
+		  });
+
+		  database.ref("notification").on("value", function(snap){
+		  	//$("#display").html(snap.val().blah);
+
+		  	//console.log("Value changed");
+		  	//console.log(snap.val());
+
+		  	$("#test").append( snap.val() );
+
+		  });
+
+		  database.ref("5000").child("vehicle_speed").on("child_added", function(snap){
+		  	//$("#display").html(snap.val().blah);
+
+		  	//console.log("Vehicle Value added");
+		  	//console.log(snap.val());
+
+		  	$("#txtVehicleSpeed").html(  snap.val().serializedValue + " " + snap.val().value.typeString );
+
+		  	if(snap.val().serializedValue > maxSpeed){
+		  		$("#txtVehicleSpeed").removeClass("label-primary");
+		  		$("#txtVehicleSpeed").addClass("label-danger");
+		  	}else{
+		  		$("#txtVehicleSpeed").removeClass("label-danger");
+		  		$("#txtVehicleSpeed").addClass("label-primary");
+		  	}
+
+		  });
+
+
+		  setMarker = function(){
+
+		  		marker.setMap(null);
+
+		  		var latlng = new google.maps.LatLng(lat,lng);
+
+				marker=new google.maps.Marker({
+				  position:latlng,
+				  icon:'pin.png'
+				  });
+
+				marker.setMap(map);
+
+		  }
+
+
+		  database.ref("5000").child("latitude").on("child_added", function(snap){
+			lat = snap.val().serializedValue;
+			setMarker();
+		  });
+
+		  database.ref("5000").child("longitude").on("child_added", function(snap){
+			lng = snap.val().serializedValue;
+			setMarker();
+		  });
+
+
+	</script>
+
+	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCss2prFxCCN78ilOq7NrWJpvDGCCvY9GY&callback=myMap"></script>
+
+  </body>
+</html>
